@@ -30,6 +30,7 @@
 #include "rtc_user.h"
 #include "global.h"
 #include "vtx316.h"
+#include "iwdg.h"
 #include "app_context.h"
 /* USER CODE END Includes */
 
@@ -509,6 +510,12 @@ void StartTask_Logic(void *argument)
   /* Infinite loop */
   for(;;)
   {
+    // ==========================================
+    // 动作：喂狗 (Refresh Watchdog)
+    // ==========================================
+    // 告诉看门狗：“我还活着，不要重启我！”
+    HAL_IWDG_Refresh(&hiwdg);
+
     // ========================================================
     // 1. RTC 闹钟逻辑 (多闹钟遍历)
     // ========================================================
