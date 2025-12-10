@@ -546,6 +546,7 @@ void StartTask_Logic(void *argument)
               curr_s == g_App.alarms[i].sec)
           {
             printf(">>> [LOGIC] ALARM [%d] TRIGGERED! <<<\r\n", i+1);
+            VTX316_Speak("请吃药");
 
             // 【关键修改】设置响铃标志位，告诉系统现在闹钟在响
             g_App.is_ringing = 1;
