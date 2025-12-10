@@ -1,0 +1,12 @@
+# --- 1. 屏蔽最占地方的编译垃圾 (重要) ---
+build/
+cmake-build-debug/
+cmake-build-release/
+
+# --- 2. 屏蔽CLion的个人配置 (重要) ---
+.idea/
+.gemini/
+
+# --- 3. 屏蔽误入的工具软件 (你截图里的那个串口助手) ---
+*.exe
+*.ini
