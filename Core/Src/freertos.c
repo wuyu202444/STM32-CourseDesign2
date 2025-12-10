@@ -412,10 +412,10 @@ void StartTask_OLED(void *argument)
         sprintf(str_buf, "[ %02d:%02d:%02d ]", h, m, s);
         OLED_ShowString(16, 16, (uint8_t *)str_buf, 16, 1);
 
-        if(g_App.is_bluetooth_on)
-            OLED_ShowString(0, 32, "BT: ON          ", 12, 1);
-        else
-            OLED_ShowString(0, 32, "BT: OFF         ", 12, 1);
+        // if(g_App.is_bluetooth_on)
+        //     OLED_ShowString(0, 32, "BT: ON          ", 12, 1);
+        // else
+        //     OLED_ShowString(0, 32, "BT: OFF         ", 12, 1);
 
         OLED_ShowString(0, 42, "S-K3:Set TIM3   ", 12, 1); // 提示用户单机进入
         OLED_ShowString(0, 52, "L-K3:Set Alarm  ", 12, 1); // 提示用户长按进入
