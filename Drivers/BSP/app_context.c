@@ -1,5 +1,5 @@
 /*
- * key.c
+ * app_context.c
  */
 
 #include "app_context.h"
@@ -15,6 +15,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "vtx316.h"
+#include "flash_storage.h" // 【新增】
 
 #define DEFAULT_SOUND  3
 
@@ -231,11 +232,18 @@ static void Handle_Key3(void) {
     {
         if (is_long_press) {
             // [长按] -> 保存并退出到正常模式
-            printf("State: Save Alarms & Exit\r\n");
-            // 这里不需要写RTC硬件，因为闹钟数据保存在g_App.alarms里，
-            // 之后的逻辑代码会去读取这个数组
+            printf("State: Save Alarms to Flash & Exit\r\n");
 
+            // 1. 给出UI提示，因为Flash擦写可能需要1-2秒
+            VTX316_Speak("正在保存");
+            WS2812_Send_Cmd(RGB_MODE_STATIC, 50, 0, 50, 0); // 紫灯常亮表示正在写
+
+            // 2. 调用保存函数 (内部已包含临界区保护)
+            Flash_Save_Settings();
+
+            // 3. 恢复状态
             g_App.current_state = SYS_NORMAL;
+            VTX316_Speak("保存成功");
             WS2812_Send_Cmd(RGB_MODE_BREATHING, 0, LED_BRIGHTNESS_BREATH, 0, 0);
 
             while(HAL_GPIO_ReadPin(KEY3_GPIO_Port, KEY3_Pin) == GPIO_PIN_RESET) osDelay(10);

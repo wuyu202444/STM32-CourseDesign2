@@ -32,6 +32,7 @@
 #include "vtx316.h"
 #include "iwdg.h"
 #include "app_context.h"
+#include "flash_storage.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -247,26 +248,29 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-  // 场景1：开机提示音（哆-来-咪）
-  Buzzer_Send_Cmd(BUZZER_MODE_SINGLE,523, START_SOUND, 100, 0); // Do
-  Buzzer_Send_Cmd(BUZZER_MODE_SINGLE,587, START_SOUND, 100, 0); // Re
-  Buzzer_Send_Cmd(BUZZER_MODE_SINGLE,659, START_SOUND, 100, 0); // Mi
-  osDelay(500);
+
+  // 1. 硬件初始化
   VTX316_Init(&huart1);
+  Key_App_Init(); // 这里会先加载默认值 (例如 23:00:00)
+
+  // 2. 尝试从Flash加载用户设置
+  // 必须放在 Key_App_Init 之后，以便覆盖默认值
+  Flash_Load_Settings();
+
+  // 3. 开机提示音和灯光
+  Buzzer_Send_Cmd(BUZZER_MODE_SINGLE,523, START_SOUND, 100, 0);
+  Buzzer_Send_Cmd(BUZZER_MODE_SINGLE,587, START_SOUND, 100, 0);
+  Buzzer_Send_Cmd(BUZZER_MODE_SINGLE,659, START_SOUND, 100, 0);
+  osDelay(500);
 
   WS2812_Send_Cmd(RGB_MODE_BREATHING, 0, LED_BRIGHTNESS_BREATH, 0, 0);
-  Key_App_Init();
 
-  // 【新增】设置语音风格
-  // 音量10(最大)，语速5(标准)，发音人:甜美女声
   VTX316_SetStyle(1, 5, VTX_ROLE_FEMALE_1);
-  osDelay(100); // 给一点点时间让模块处理设置
-  // 此时播报就会应用上面的设置
+  osDelay(100);
   VTX316_Speak("开机");
-  // 【调试】打印系统启动信息
+
   printf("\r\n================================\r\n");
   printf("   Smart Medicine Box System    \r\n");
-  printf("   System Booted Successfully   \r\n");
   printf("================================\r\n");
 
   /* Infinite loop */
