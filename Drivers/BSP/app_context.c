@@ -240,6 +240,7 @@ static void Handle_Key3(void) {
 
             // 2. 调用保存函数 (内部已包含临界区保护)
             Flash_Save_Settings();
+            osDelay(500);
 
             // 3. 恢复状态
             g_App.current_state = SYS_NORMAL;

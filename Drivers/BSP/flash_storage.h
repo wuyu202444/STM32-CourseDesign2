@@ -7,6 +7,9 @@
 #include "main.h"
 #include "app_context.h" // 包含 AlarmTime_t 和 MAX_ALARMS 定义
 
+// 【新增】引入 CRC 头文件 (由 CubeMX 生成)
+#include "crc.h"
+
 // 定义Flash存储的起始地址 (Sector 7 Start for STM32F411RE)
 // 如果你的程序非常大超过了384KB，请检查Map文件，否则Sector 7是安全的
 #define FLASH_SAVE_ADDR  0x08060000
@@ -14,11 +17,14 @@
 // 定义一个魔数，用于判断Flash里是否已经存过有效数据
 #define FLASH_MAGIC_NUM  0xA5A55A5A
 
-// 定义我们要存的结构体
+// 【修改】结构体增加 crc_val 字段
+// 建议将 CRC 放在结构体的最后，方便计算前面所有数据的校验值
 typedef struct {
-    uint32_t magic;                 // 标志位
+    uint32_t magic;                 // 标志位 (4字节)
     AlarmTime_t alarms[MAX_ALARMS]; // 闹钟数组
-    // 如果后续有其他需要保存的配置（如音量、灵敏度），加在这里
+    // ... 其他数据 ...
+
+    uint32_t crc_val;               // 【新增】校验码 (4字节)
 } SystemSettings_t;
 
 // 函数声明
