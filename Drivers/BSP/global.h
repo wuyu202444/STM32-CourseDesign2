@@ -10,7 +10,7 @@
 #define LED_BRIGHTNESS_ALARM    80
 #define MAX_ALARMS              3  // 最大闹钟数量
 
-#define TEMP_LIMIT  31.0
+#define TEMP_LIMIT  32.0
 #define VOL_LIMIT   1500
 
 #define START_SOUND 3
