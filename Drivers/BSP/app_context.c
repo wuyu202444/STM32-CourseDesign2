@@ -14,6 +14,7 @@
 // 【新增】必须引入 FreeRTOS 原生头文件，才能使用 taskENTER_CRITICAL
 #include "FreeRTOS.h"
 #include "task.h"
+#include "vtx316.h"
 
 #define DEFAULT_SOUND  3
 
@@ -109,6 +110,8 @@ static void Handle_Key0(void) {
 
                 // 提示音：长鸣一声表示上锁
                 Buzzer_Send_Cmd(BUZZER_MODE_SINGLE, 1000, DEFAULT_SOUND, 500, 0);
+                osDelay(1000);
+                VTX316_Speak("已上锁");
             }
         }
         else
@@ -119,6 +122,8 @@ static void Handle_Key0(void) {
             // 拒绝提示音：急促短叫
             osDelay(150);
             Buzzer_Send_Cmd(BUZZER_MODE_SINGLE, 500, DEFAULT_SOUND, 100, 0);
+            osDelay(500);
+            VTX316_Speak("请刷卡");
         }
     }
     else if (g_App.current_state == SYS_SETTING_TIME) {

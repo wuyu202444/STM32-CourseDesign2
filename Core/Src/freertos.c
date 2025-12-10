@@ -324,6 +324,7 @@ void StartTask_Sensor(void *argument)
 
         // 1. 刷卡提示音
         Buzzer_Send_Cmd(BUZZER_MODE_SINGLE, 2000, CARD_SOUND, 100, 0);
+        osDelay(100);
 
         // 2. 比对卡号 (只比对前4位)
         if (card_id[0] == Authorized_UID[0] &&
@@ -332,6 +333,7 @@ void StartTask_Sensor(void *argument)
             card_id[3] == Authorized_UID[3])
         {
           printf(">>> [RFID] Correct! Permission Granted. <<<\r\n");
+          VTX316_Speak("读卡成功");
 
           // 【关键】只给权限，不开箱。开箱由 Key0 决定
           g_App.is_rfid_passed = 1;
@@ -349,6 +351,7 @@ void StartTask_Sensor(void *argument)
           WS2812_Send_Cmd(RGB_MODE_BLINK, 30, 0, 0, 500);
           osDelay(500);
           WS2812_Send_Cmd(RGB_MODE_BREATHING, 0, LED_BRIGHTNESS_BREATH, 0, 0);
+          VTX316_Speak("错误");
         }
       }
       osDelay(500); // 读卡防抖
@@ -559,31 +562,32 @@ void StartTask_Logic(void *argument)
       // --------------------------------------------------------
       if (received_msg.temperature >= TEMP_LIMIT)
       {
-          if (is_temp_alarm == 0)
-          {
-              printf(">>> [LOGIC] ALERT: Temp High! %.1f C\r\n", received_msg.temperature);
-              Buzzer_Send_Cmd(BUZZER_MODE_LOOP, 2000, ALARM_SOUND, 100, 100);
-              WS2812_Send_Cmd(RGB_MODE_BLINK, 100, 0, 0, 200);
-              is_temp_alarm = 1;
-          }
+        if (is_temp_alarm == 0)
+        {
+          printf(">>> [LOGIC] ALERT: Temp High! %.1f C\r\n", received_msg.temperature);
+          Buzzer_Send_Cmd(BUZZER_MODE_LOOP, 2000, ALARM_SOUND, 100, 100);
+          WS2812_Send_Cmd(RGB_MODE_BLINK, 100, 0, 0, 200);
+          is_temp_alarm = 1;
+          VTX316_Speak("温度过高");
+        }
       }
       else // 温度正常
       {
-          if (is_temp_alarm == 1)
-          {
-              is_temp_alarm = 0;
-              // 【关键修改】增加 && g_App.is_ringing == 0
-              // 只有当药量正常，且【闹钟没在响】的时候，才关声音
-              if (is_drug_alarm == 0 && g_App.is_ringing == 0) {
-                Buzzer_Send_Cmd(BUZZER_MODE_OFF, 0, 0, 0, 0);
-                WS2812_Send_Cmd(RGB_MODE_BREATHING, 0, LED_BRIGHTNESS_BREATH, 0, 0);
-              }
-              else if (is_drug_alarm == 1){
-                // 恢复为药量报警状态
-                Buzzer_Send_Cmd(BUZZER_MODE_LOOP, 500, ALARM_SOUND, 500, 500);
-                WS2812_Send_Cmd(RGB_MODE_BLINK, 0, 0, 100, 500);
-              }
+        if (is_temp_alarm == 1)
+        {
+          is_temp_alarm = 0;
+          // 【关键修改】增加 && g_App.is_ringing == 0
+          // 只有当药量正常，且【闹钟没在响】的时候，才关声音
+          if (is_drug_alarm == 0 && g_App.is_ringing == 0) {
+            Buzzer_Send_Cmd(BUZZER_MODE_OFF, 0, 0, 0, 0);
+            WS2812_Send_Cmd(RGB_MODE_BREATHING, 0, LED_BRIGHTNESS_BREATH, 0, 0);
           }
+          else if (is_drug_alarm == 1){
+            // 恢复为药量报警状态
+            Buzzer_Send_Cmd(BUZZER_MODE_LOOP, 500, ALARM_SOUND, 500, 500);
+            WS2812_Send_Cmd(RGB_MODE_BLINK, 0, 0, 100, 500);
+          }
+        }
       }
 
       // --------------------------------------------------------
@@ -596,8 +600,9 @@ void StartTask_Logic(void *argument)
           printf(">>> [LOGIC] ALERT: Low Drug Level! (ADC: %d)\r\n", received_msg.adc_value);
           // 如果没有高温报警，才开启缺药报警（高温优先级更高）
           if (is_temp_alarm == 0) {
-              Buzzer_Send_Cmd(BUZZER_MODE_LOOP, 500, ALARM_SOUND, 500, 500);
-              WS2812_Send_Cmd(RGB_MODE_BLINK, 0, 0, 100, 500);
+            Buzzer_Send_Cmd(BUZZER_MODE_LOOP, 500, ALARM_SOUND, 500, 500);
+            WS2812_Send_Cmd(RGB_MODE_BLINK, 0, 0, 100, 500);
+            VTX316_Speak("药量低");
           }
           is_drug_alarm = 1;
         }
